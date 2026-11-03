@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=spotter-weather-aware-production-secret-2026
+      - ALLOWED_HOSTS=*
+      - WEATHER_PROVIDER=openmeteo
+      - ROUTING_PROVIDER=tomtom
+      - TOMTOM_API_KEY=${TOMTOM_API_KEY:-}
+      - DEMO_SCENARIO=S2_WIND_FRONT
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped

@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: spotter-weather-routing
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: "*"
+      - key: WEATHER_PROVIDER
+        value: "openmeteo"
+      - key: ROUTING_PROVIDER
+        value: "tomtom"
+      - key: TOMTOM_API_KEY
+        sync: false

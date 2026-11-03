@@ -1,0 +1,16 @@
+django>=5.0,<5.2
+djangorestframework>=3.15.0
+django-cors-headers>=4.3.0
+whitenoise>=6.6.0
+uvicorn[standard]>=0.30.0
+gunicorn>=22.0.0
+httpx>=0.27.0
+numpy>=1.26.0
+h3>=4.1.0
+timezonefinder>=6.5.0
+polyline>=2.0.0
+drf-spectacular>=0.27.0
+pytest>=8.0.0
+pytest-django>=4.8.0
+hypothesis>=6.100.0
+respx>=0.21.0
