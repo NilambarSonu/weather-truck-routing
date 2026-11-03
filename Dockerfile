@@ -1,6 +1,6 @@
 # Stage 1: Build Frontend
 FROM node:22-alpine AS frontend-builder
-WORKDIR /web
+WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm ci --prefer-offline --no-audit
 COPY frontend/ ./
@@ -26,7 +26,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY backend/ ./
 
 # Copy compiled frontend static build
-COPY --from=frontend-builder /backend/static_build ./static_build
+COPY --from=frontend-builder /app/backend/static_build ./static_build
 
 # Run migrations and collect static files
 RUN python manage.py collectstatic --noinput

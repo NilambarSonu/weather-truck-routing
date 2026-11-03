@@ -95,8 +95,11 @@ class PlanOrchestrator:
         if not routes:
             raise ValueError("No drivable routes found between specified origin and destination.")
 
-        if len(routes) < 3:
-            warnings.append(f"Only {len(routes)} distinct route options available for this corridor.")
+        if not os.getenv("TOMTOM_API_KEY"):
+            warnings.append(
+                "Keyless demo routing active (synthetic highway corridors). "
+                "Set TOMTOM_API_KEY to activate live commercial truck routing."
+            )
 
         # Stage 4 & 5: Geometry, time curve, checkpoints for each route
         h3_res = 5

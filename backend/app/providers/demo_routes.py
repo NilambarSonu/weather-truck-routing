@@ -115,7 +115,7 @@ def get_demo_routes(origin: Place, dest: Place) -> List[RoutePath]:
     # Route A: Direct corridor
     route_a = create_synthetic_route(
         route_id="A",
-        label="Fastest Route",
+        label="Fastest Route (Demo)",
         origin=origin,
         dest=dest,
         lateral_offset_fraction=0.04,
@@ -126,7 +126,7 @@ def get_demo_routes(origin: Place, dest: Place) -> List[RoutePath]:
     # Route B: Northern / Western bypass corridor
     route_b = create_synthetic_route(
         route_id="B",
-        label="Northern Corridor",
+        label="Northern Corridor (Demo)",
         origin=origin,
         dest=dest,
         lateral_offset_fraction=-0.16,
@@ -137,7 +137,7 @@ def get_demo_routes(origin: Place, dest: Place) -> List[RoutePath]:
     # Route C: Southern / Eastern bypass corridor
     route_c = create_synthetic_route(
         route_id="C",
-        label="Southern Corridor",
+        label="Southern Corridor (Demo)",
         origin=origin,
         dest=dest,
         lateral_offset_fraction=0.18,

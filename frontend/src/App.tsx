@@ -61,6 +61,19 @@ export const App: React.FC = () => {
 
           {plan && (
             <div className="space-y-4 pt-2 border-t border-slate-800/80">
+              {plan.meta?.warnings?.length > 0 && (
+                <div className="p-3 bg-amber-950/30 border border-amber-500/40 rounded-xl text-xs text-amber-300 space-y-1">
+                  <div className="font-semibold flex items-center gap-1.5 text-amber-200">
+                    <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                    Operational Advisory:
+                  </div>
+                  {plan.meta.warnings.map((w, idx) => (
+                    <p key={idx} className="text-[11px] text-amber-300/90 leading-relaxed">
+                      {w}
+                    </p>
+                  ))}
+                </div>
+              )}
               <RecommendationBanner />
               <RouteCards />
             </div>
