@@ -61,13 +61,13 @@
 
 | # | Architectural Decision | Rationale & Practical Impact |
 |---|---|---|
-| **1** | **Weather as a Spatial Field** | Rather than querying weather at 180 individual checkpoints across 3 routes, every point snaps to an **Uber H3 hexagon** (`res=5` for trips &le;700 mi, `res=4` for longer trips). Unique cell count drops by 70%, preserving free quotas while guaranteeing checkpoints and heatmap never disagree. |
-| **2** | **Cumulative Time Curve $T(d)$** | Instead of a naive $D / \text{speed}$ average, ETAs are derived from step-level duration curves. On a 1,000-mile trip, mountain passes and urban slowdowns alter the arrival hour, preventing severe misclassification. |
-| **3** | **Exact Temporal Semantics** | Open-Meteo wind speed is an instantaneous point value at the hour mark (interpolated linearly), while rain and snow are cumulative sums over the preceding 60 minutes (assigned to the interval bucket $\lfloor t \rfloor + 3600$). |
-| **4** | **Mile-Weighted Attribution** | Each checkpoint owns half the distance to its preceding neighbor and half to its succeeding neighbor. Severe and High metrics are computed in **physical miles**, holding the invariant: $\sum \text{miles}_i = \text{Route Length}$. |
-| **5** | **Total Risk Function & Round-Half-Up** | Threshold comparisons use standard Decimal `ROUND_HALF_UP`. Prevents floating-point boundary anomalies (e.g. 34.96 mph rounds to 35.0 mph $\rightarrow$ High). |
-| **6** | **Tolerance-Banded Lexicographic Ranking** | Follows the official 4-tier preference order (Severe mi $\rightarrow$ High mi $\rightarrow$ Avg Risk $\rightarrow$ Travel Time) but applies an epsilon tolerance relative to the tier best, preventing a 0.2-mile difference from rejecting a route saving 3 hours. |
-| **7** | **Guaranteed 3 Distinct Routes** | Uses provider alternatives filtered by overlap ($\le 85\%$) and detour ($\le 1.6\times$), backed by lateral perpendicular via-point diversification and deterministic freight corridors. |
+| **1** | **Weather as a Spatial Field** | Rather than querying weather at 180 individual checkpoints across 3 routes, every point snaps to an **Uber H3 hexagon** (`res=5` for trips ≤ 700 mi, `res=4` for longer trips). Unique cell count drops by 70%, preserving free quotas while guaranteeing checkpoints and heatmap never disagree. |
+| **2** | **Cumulative Time Curve `T(d)`** | Instead of a naive `distance / speed` average, ETAs are derived from step-level duration curves. On a 1,000-mile trip, mountain passes and urban slowdowns alter the arrival hour, preventing severe misclassification. |
+| **3** | **Exact Temporal Semantics** | Open-Meteo wind speed is an instantaneous point value at the hour mark (interpolated linearly), while rain and snow are cumulative sums over the preceding 60 minutes (assigned to the interval bucket `[t, t + 1hr]`). |
+| **4** | **Mile-Weighted Attribution** | Each checkpoint owns half the distance to its preceding neighbor and half to its succeeding neighbor. Severe and High metrics are computed in **physical miles**, holding the invariant: `sum(miles) == Route Length`. |
+| **5** | **Total Risk Function & Round-Half-Up** | Threshold comparisons use standard Decimal `ROUND_HALF_UP`. Prevents floating-point boundary anomalies (e.g. 34.96 mph rounds to 35.0 mph → High). |
+| **6** | **Tolerance-Banded Lexicographic Ranking** | Follows the official 4-tier preference order (Severe mi → High mi → Avg Risk → Travel Time) but applies an epsilon tolerance relative to the tier best, preventing a 0.2-mile difference from rejecting a route saving 3 hours. |
+| **7** | **Guaranteed 3 Distinct Routes** | Uses provider alternatives filtered by overlap (≤ 85%) and detour (≤ 1.6×), backed by lateral perpendicular via-point diversification and deterministic freight corridors. |
 | **8** | **Precomputed Byte Matrix Heatmap** | 49 hourly corridor frames are precomputed server-side into a single `uint8` matrix transmitted as base64 under 30 KB. Scrubbing the slider triggers **zero network requests** and maintains a steady **60 FPS**. |
 
 ---
@@ -76,11 +76,11 @@
 
 | # | Spec Ambiguity | Implementation Decision | Engineering Rationale |
 |---|---|---|---|
-| **1** | *"Sample every 10 / 25 / 50 miles"* | Added **Auto** mode as default: 10 mi for trips $\le 250$ mi, 25 mi for $\le 800$ mi, 50 mi for $> 800$ mi. User can select fixed 10, 25, or 50 mi. | Keeps checkpoint count between 25 and 65 per route, balancing spatial resolution with network efficiency. |
+| **1** | *"Sample every 10 / 25 / 50 miles"* | Added **Auto** mode as default: 10 mi for trips ≤ 250 mi, 25 mi for ≤ 800 mi, 50 mi for > 800 mi. User can select fixed 10, 25, or 50 mi. | Keeps checkpoint count between 25 and 65 per route, balancing spatial resolution with network efficiency. |
 | **2** | *Which wind value to classify* | Sustained 10-meter wind speed is classified against thresholds; gusts are recorded and shown in popups. | Standard meteorological practice: sustained wind dictates commercial truck stability. |
 | **3** | *Precipitation units* | Liquid rain + showers in inches over the hour; snowfall depth in inches over the hour. | Direct match to official assessment table; avoids water-equivalent conversion drift. |
 | **4** | *Boundary values (0.25, 1.0, 35 mph)* | Lower bound inclusive. On shared edges, more severe class wins (e.g. 0.25 in/hr rain = High). | Safety-first, unambiguous, and reproducible. |
-| **5** | *Combining multi-hazards* | Overall checkpoint risk = $\max(\text{wind}, \text{rain}, \text{snow})$ after load rules. | Trucks are exposed to hazards simultaneously; the governing condition dictates safety. |
+| **5** | *Combining multi-hazards* | Overall checkpoint risk = max(wind, rain, snow) after load rules. | Trucks are exposed to hazards simultaneously; the governing condition dictates safety. |
 | **6** | *Departure time zone* | Input is interpreted in the origin local timezone and converted to UTC for weather lookup. | Long-haul trips cross 3+ time zones; displaying ETAs in local time ensures driver clarity. |
 | **7** | *No Travel meaning* | Hard disqualification. Any route with No Travel miles cannot be recommended while an unblocked route exists. | Prevents unsafe dispatching. If all routes are blocked, recommends delaying departure. |
 
@@ -92,15 +92,15 @@
 
 | Risk Condition | Low (Safe) | Moderate (Caution) | High (Elevated) | Severe (Dangerous) | No Travel (Hard Block) |
 |---|---|---|---|---|---|
-| **Wind Speed** | $< 25.0\text{ mph}$ | $25.0 \le x < 35.0$ | $35.0 \le x < 45.0$ | $45.0 \le x < 55.0$ | $\ge 55.0\text{ mph}$ |
-| **Rain (Precip)** | $< 0.10\text{ in/hr}$ | $0.10 \le x < 0.25$ | $0.25 \le x < 0.50$ | $0.50 \le x \le 1.00$ | $> 1.00\text{ in/hr}$ |
-| **Snowfall** | $< 0.50\text{ in/hr}$ | $0.50 \le x < 1.00$ | $1.00 \le x < 2.00$ | $2.00 \le x \le 3.00$ | $> 3.00\text{ in/hr}$ |
+| **Wind Speed** | < 25.0 mph | 25.0 ≤ x < 35.0 | 35.0 ≤ x < 45.0 | 45.0 ≤ x < 55.0 | ≥ 55.0 mph |
+| **Rain (Precip)** | < 0.10 in/hr | 0.10 ≤ x < 0.25 | 0.25 ≤ x < 0.50 | 0.50 ≤ x ≤ 1.00 | > 1.00 in/hr |
+| **Snowfall** | < 0.50 in/hr | 0.50 ≤ x < 1.00 | 1.00 ≤ x < 2.00 | 2.00 ≤ x ≤ 3.00 | > 3.00 in/hr |
 
 ### Cargo Load Escalation Rules
 
-- **Wind $\ge 55\text{ mph}$:** $\rightarrow$ **No Travel** for every load weight.
-- **Wind $45\text{–}54\text{ mph}$ with load $> 30,000\text{ lb}$:** $\rightarrow$ Escalates to **No Travel**.
-- **Wind $35\text{–}44\text{ mph}$ with load $> 40,000\text{ lb}$:** $\rightarrow$ Escalates to **Severe**.
+- **Wind ≥ 55 mph:** → **No Travel** for every load weight.
+- **Wind 45–54 mph with load > 30,000 lb:** → Escalates to **No Travel**.
+- **Wind 35–44 mph with load > 40,000 lb:** → Escalates to **Severe**.
 
 ---
 
@@ -129,9 +129,9 @@ cd backend
 
 ### Verified Test Vectors & Invariants
 1. **Golden Table (18 Vectors):** Tests every boundary edge, decimal round-half-up transition, and wind/load escalation rule.
-2. **Checkpoint Metric Invariant:** Asserts $\sum \text{owned\_mi}_i == \text{Total Route Miles}$.
-3. **Risk Tier Sum Invariant:** Asserts $\text{severe\_mi} + \text{high\_mi} + \text{moderate\_mi} + \text{low\_mi} + \text{no\_travel\_mi} == \text{Total Miles}$.
-4. **ETA Monotonicity:** Asserts that checkpoint arrival times are strictly non-decreasing along the route.
+2. **Checkpoint Metric Invariant:** Asserts `sum(owned_miles) == Total Route Miles` (each checkpoint owns half-interval distance to adjacent neighbors).
+3. **Risk Tier Sum Invariant:** Asserts `severe_mi + high_mi + moderate_mi + low_mi + no_travel_mi == Total Route Miles` across all tiers.
+4. **ETA Monotonicity:** Asserts that checkpoint arrival times are strictly non-decreasing along the route (`t_{i+1} >= t_i`).
 5. **No Travel Hard Block:** Asserts that a route with No Travel miles is never recommended over an unblocked option.
 
 ```bash
@@ -145,8 +145,8 @@ npm test
 ## 6. Quick Start & Local Execution
 
 ### Prerequisites
-- Node.js $\ge 20$
-- Python $\ge 3.12$ (or Docker)
+- Node.js ≥ 20
+- Python ≥ 3.12 (or Docker)
 
 ### Option A: Local Development
 
