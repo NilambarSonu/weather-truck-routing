@@ -32,6 +32,27 @@ const PRESET_CORRIDORS = [
   },
 ];
 
+export const CARGO_WEIGHT_PRESETS = [20000, 32000, 42000, 65000] as const;
+
+export function getEscalationPolicy(loadLb: number): 'baseline' | 'wind_45_no_travel' | 'wind_35_severe_45_no_travel' {
+  if (loadLb > 40000) return 'wind_35_severe_45_no_travel';
+  if (loadLb > 30000) return 'wind_45_no_travel';
+  return 'baseline';
+}
+
+export function validateCargoWeight(loadLb: number): { valid: boolean; error?: string } {
+  if (isNaN(loadLb) || loadLb === null || loadLb === undefined) {
+    return { valid: false, error: 'Weight is required' };
+  }
+  if (loadLb < 1) {
+    return { valid: false, error: 'Weight must be at least 1 lb' };
+  }
+  if (loadLb > 80000) {
+    return { valid: false, error: 'Weight cannot exceed 80,000 lb' };
+  }
+  return { valid: true };
+}
+
 export const TripForm: React.FC = () => {
   const { setPlan, setHeatmapPayload, setIsHeatmapLoading } = useTripStore();
 
@@ -314,20 +335,25 @@ export const TripForm: React.FC = () => {
           type="number"
           min="1"
           max="80000"
-          step="500"
-          {...register('load_lb', { required: true, min: 1, max: 80000 })}
+          step="any"
+          {...register('load_lb', {
+            required: 'Cargo weight is required',
+            min: { value: 1, message: 'Minimum cargo weight is 1 lb' },
+            max: { value: 80000, message: 'Maximum cargo weight is 80,000 lb' },
+            valueAsNumber: true,
+          })}
           className="w-full bg-white border border-saas-border focus:border-saas-primary rounded-lg px-3 py-2 text-xs text-saas-text focus:outline-none focus:ring-1 focus:ring-saas-primary font-mono shadow-saas-sm"
         />
 
         {/* Quick weight selector chips */}
         <div className="flex gap-1.5 mt-2">
-          {[20000, 32000, 42000, 65000].map((wt) => (
+          {CARGO_WEIGHT_PRESETS.map((wt) => (
             <button
               key={wt}
               type="button"
-              onClick={() => setValue('load_lb', wt)}
+              onClick={() => setValue('load_lb', wt, { shouldValidate: true, shouldDirty: true })}
               className={`text-[11px] px-2.5 py-1 rounded-md border transition font-mono font-medium ${
-                watchLoad === wt
+                Number(watchLoad) === wt
                   ? 'bg-saas-softBlue text-saas-primary border-saas-primary shadow-saas-sm'
                   : 'bg-white text-saas-secondary border-saas-border hover:bg-slate-50'
               }`}
@@ -340,11 +366,11 @@ export const TripForm: React.FC = () => {
         {/* Load Rule dynamic status banner */}
         <div className="mt-2.5 text-[11px] p-2 bg-white rounded-lg border border-saas-border text-saas-secondary leading-relaxed shadow-saas-sm">
           <span className="font-semibold text-saas-text">Escalation Policy:</span>{' '}
-          {watchLoad > 40000 ? (
+          {getEscalationPolicy(Number(watchLoad)) === 'wind_35_severe_45_no_travel' ? (
             <span className="text-orange-700 font-medium">
               &gt;40,000 lb: Wind 35-44 mph escalates to <strong>Severe</strong>. Wind 45-54 mph triggers <strong>No Travel</strong>.
             </span>
-          ) : watchLoad > 30000 ? (
+          ) : getEscalationPolicy(Number(watchLoad)) === 'wind_45_no_travel' ? (
             <span className="text-amber-800 font-medium">
               &gt;30,000 lb: Wind 45-54 mph escalates to <strong>No Travel</strong>.
             </span>
