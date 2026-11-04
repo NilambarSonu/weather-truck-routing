@@ -4,47 +4,57 @@
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 antialiased;
+    @apply bg-[#F5F7FA] text-[#172033] antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
-/* Custom Scrollbars */
+/* Custom Minimal Light Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #020617;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 3px;
+  background: #E2E8F0;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #CBD5E1;
 }
 
-/* MapLibre Popup Styling Override */
+/* MapLibre Popup Styling Override for Light Minimal Theme */
 .maplibregl-popup-content {
   background: transparent !important;
   padding: 0 !important;
   box-shadow: none !important;
 }
 .maplibregl-popup-anchor-top .maplibregl-popup-tip {
-  border-bottom-color: #0f172a !important;
+  border-bottom-color: #FFFFFF !important;
 }
 .maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
-  border-top-color: #0f172a !important;
+  border-top-color: #FFFFFF !important;
 }
 .maplibregl-popup-anchor-left .maplibregl-popup-tip {
-  border-right-color: #0f172a !important;
+  border-right-color: #FFFFFF !important;
 }
 .maplibregl-popup-anchor-right .maplibregl-popup-tip {
-  border-left-color: #0f172a !important;
+  border-left-color: #FFFFFF !important;
 }
 .maplibregl-popup-close-button {
-  color: #94a3b8 !important;
+  color: #64748B !important;
   font-size: 16px !important;
-  padding: 4px 8px !important;
+  padding: 6px 8px !important;
+  outline: none !important;
+}
+.maplibregl-popup-close-button:hover {
+  color: #0F172A !important;
+  background: transparent !important;
+}
+
+/* Slider Track & Thumb Styling */
+input[type="range"] {
+  accent-color: #4778D5;
 }

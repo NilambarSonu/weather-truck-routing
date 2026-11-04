@@ -15,47 +15,44 @@ export const RiskRibbon: React.FC = () => {
   const checkpoints = selectedRoute.checkpoints;
 
   return (
-    <div className="bg-slate-900/90 backdrop-blur border border-slate-800 rounded-xl p-3 shadow-xl">
+    <div className="bg-white/95 backdrop-blur border border-saas-border rounded-2xl p-3.5 shadow-saas-md">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <Shield className="w-3.5 h-3.5 text-blue-400" />
-          <span className="text-xs font-semibold text-slate-200">
-            Route {selectedRoute.id} Corridor Risk Ribbon
+          <Shield className="w-4 h-4 text-saas-primary" />
+          <span className="text-xs font-semibold text-saas-text">
+            Route {selectedRoute.id} Corridor Weather Risk Ribbon
           </span>
-          <span className="text-[11px] text-slate-400 font-mono">
+          <span className="text-[11px] text-saas-muted font-mono font-medium">
             ({totalMi.toFixed(0)} mi)
           </span>
         </div>
 
         {hoveredCheckpoint ? (
-          <div className="flex items-center gap-2 text-xs font-mono bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-slate-300">
-            <span className="text-blue-400">Mile {hoveredCheckpoint.dist_mi.toFixed(0)}:</span>
-            <span>{hoveredCheckpoint.weather.wind_mph} mph wind</span>
+          <div className="flex items-center gap-2 text-xs font-mono bg-saas-subtle px-2.5 py-1 rounded-lg border border-saas-border text-saas-text shadow-saas-sm">
+            <span className="text-saas-primary font-bold">Mile {hoveredCheckpoint.dist_mi.toFixed(0)}:</span>
+            <span>{hoveredCheckpoint.weather.wind_mph.toFixed(0)} mph wind</span>
             {hoveredCheckpoint.weather.rain_in_hr > 0 && (
-              <span className="text-cyan-400">| {hoveredCheckpoint.weather.rain_in_hr} in/hr rain</span>
+              <span className="text-blue-600 font-medium">| {hoveredCheckpoint.weather.rain_in_hr.toFixed(2)} in/hr rain</span>
             )}
             {hoveredCheckpoint.weather.snow_in_hr > 0 && (
-              <span className="text-blue-200">| {hoveredCheckpoint.weather.snow_in_hr} in/hr snow</span>
+              <span className="text-indigo-600 font-medium">| {hoveredCheckpoint.weather.snow_in_hr.toFixed(2)} in/hr snow</span>
             )}
             <span
-              className="px-1.5 py-0.2 rounded font-semibold text-[10px]"
-              style={{
-                backgroundColor: RISK_COLORS[hoveredCheckpoint.risk.overall],
-                color: hoveredCheckpoint.risk.overall === 'MODERATE' ? '#000' : '#fff',
-              }}
+              className="px-2 py-0.5 rounded text-[10px] font-bold text-white shadow-sm"
+              style={{ backgroundColor: RISK_COLORS[hoveredCheckpoint.risk.overall] }}
             >
               {hoveredCheckpoint.risk.overall}
             </span>
           </div>
         ) : (
-          <span className="text-[11px] text-slate-500 font-mono">
-            Hover checkpoints to inspect segment weather
+          <span className="text-[11px] text-saas-muted font-medium">
+            Hover checkpoints to inspect segment hazards
           </span>
         )}
       </div>
 
       {/* Ribbon Bar (Segments proportional to owned miles) */}
-      <div className="relative h-6 w-full rounded-md overflow-hidden flex bg-slate-950 border border-slate-800">
+      <div className="relative h-6 w-full rounded-lg overflow-hidden flex bg-slate-100 border border-saas-border shadow-inner">
         {checkpoints.map((cp) => {
           const widthPct = (cp.owned_mi / totalMi) * 100;
           const isHovered = hoveredCheckpoint?.index === cp.index;
@@ -68,8 +65,8 @@ export const RiskRibbon: React.FC = () => {
                 width: `${widthPct}%`,
                 backgroundColor: RISK_COLORS[cp.risk.overall],
               }}
-              className={`h-full transition-opacity cursor-pointer relative ${
-                isHovered ? 'ring-2 ring-white z-10 brightness-125' : 'hover:opacity-90'
+              className={`h-full transition-all cursor-pointer relative ${
+                isHovered ? 'ring-2 ring-saas-primary z-10 brightness-110 scale-y-110' : 'hover:opacity-90'
               }`}
               title={`Mile ${cp.dist_mi}: ${cp.risk.overall} (Wind: ${cp.weather.wind_mph}mph, Rain: ${cp.weather.rain_in_hr}in, Snow: ${cp.weather.snow_in_hr}in)`}
             />
@@ -78,7 +75,7 @@ export const RiskRibbon: React.FC = () => {
       </div>
 
       {/* Axis Mileage Ticks */}
-      <div className="flex justify-between items-center text-[10px] font-mono text-slate-500 mt-1 px-1">
+      <div className="flex justify-between items-center text-[10px] font-mono text-saas-muted mt-1.5 px-0.5 font-medium">
         <span>0 mi (Origin)</span>
         <span>{(totalMi * 0.25).toFixed(0)} mi</span>
         <span>{(totalMi * 0.5).toFixed(0)} mi</span>
