@@ -41,6 +41,8 @@ coverage/
 *.swo
 
 # Extracted documents scratch files
+*.pdf
+*.docx
 docx_extracted.txt
 fs_assessment.txt
 gmail_instructions.txt
