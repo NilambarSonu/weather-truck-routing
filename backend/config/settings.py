@@ -9,7 +9,7 @@ SECRET_KEY = os.getenv(
 
 DEBUG = os.getenv("DEBUG", "True").lower() in ("true", "1", "yes")
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
+ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -73,10 +73,15 @@ if DATABASE_URL:
         }
     }
 else:
+    # On serverless (Vercel / Lambda) the root filesystem is read-only; use /tmp for sqlite
+    if os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+        db_path = Path("/tmp/db.sqlite3")
+    else:
+        db_path = BASE_DIR / "db.sqlite3"
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "NAME": db_path,
         }
     }
 
@@ -93,10 +98,14 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Check if Vite frontend build exists to serve single-service
 BUILD_DIR = BASE_DIR / "static_build"
+STATIC_DIRS = []
 if BUILD_DIR.exists():
-    STATICFILES_DIRS = [BUILD_DIR]
-else:
-    STATICFILES_DIRS = []
+    STATIC_DIRS.append(BUILD_DIR)
+dist_dir = BASE_DIR.parent / "dist"
+if dist_dir.exists():
+    STATIC_DIRS.append(dist_dir)
+STATICFILES_DIRS = STATIC_DIRS
+WHITENOISE_ROOT = BUILD_DIR if BUILD_DIR.exists() else dist_dir
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

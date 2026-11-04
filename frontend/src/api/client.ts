@@ -1,6 +1,6 @@
 import { Place, TripPlanRequest, TripPlan, HeatmapPayload } from './types';
 
-const API_BASE = '/api/v1';
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '') + '/api/v1';
 
 export async function geocodePlaces(query: string): Promise<Place[]> {
   if (!query || query.trim().length === 0) return [];

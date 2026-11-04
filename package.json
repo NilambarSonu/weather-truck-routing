@@ -1,0 +1,9 @@
+{
+  "name": "weather-truck-routing",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build && mkdir -p ../dist && cp -r ../backend/static_build/* ../dist/",
+    "test": "cd frontend && npm test"
+  }
+}

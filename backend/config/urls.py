@@ -12,14 +12,36 @@ urlpatterns = [
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
 ]
 
-# SPA fallback handler: serves frontend index.html for non-API routes
+from django.views.static import serve
+
+# Assets and SPA handlers
 BASE_DIR = Path(__file__).resolve().parent.parent
-BUILD_INDEX = BASE_DIR / "static_build" / "index.html"
+SPA_CANDIDATES = [
+    BASE_DIR / "static_build" / "index.html",
+    BASE_DIR / "staticfiles" / "index.html",
+    BASE_DIR.parent / "dist" / "index.html",
+    BASE_DIR.parent / "frontend" / "dist" / "index.html",
+]
+
+ASSETS_DIRS = [
+    BASE_DIR / "static_build" / "assets",
+    BASE_DIR / "staticfiles" / "assets",
+    BASE_DIR.parent / "dist" / "assets",
+    BASE_DIR.parent / "frontend" / "dist" / "assets",
+]
+
+
+def serve_asset(request, path):
+    for adir in ASSETS_DIRS:
+        if (adir / path).exists():
+            return serve(request, path, document_root=adir)
+    return HttpResponse(status=404)
 
 
 def serve_spa(request):
-    if BUILD_INDEX.exists():
-        return FileResponse(open(BUILD_INDEX, "rb"))
+    for candidate in SPA_CANDIDATES:
+        if candidate.exists():
+            return FileResponse(open(candidate, "rb"))
     return HttpResponse(
         "<h1>Spotter Weather-Aware Truck Routing API</h1>"
         "<p>API running at <code>/api/v1/</code>. Frontend build will be served here once compiled.</p>"
@@ -28,4 +50,5 @@ def serve_spa(request):
     )
 
 
-urlpatterns.append(re_path(r"^(?!api/|admin/|static/).*$", serve_spa))
+urlpatterns.append(re_path(r"^assets/(?P<path>.*)$", serve_asset))
+urlpatterns.append(re_path(r"^(?!api/|admin/|static/|assets/).*$", serve_spa))
