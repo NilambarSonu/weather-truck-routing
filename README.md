@@ -18,7 +18,6 @@
 - **Live Production Platform:** [https://spotter.nilambarsonu.me](https://spotter.nilambarsonu.me) *(Primary Custom Domain)*
 - **Vercel Production Mirror:** [https://incomplete-six.vercel.app](https://incomplete-six.vercel.app)
 - **Interactive OpenAPI 3 / Swagger Documentation:** [https://spotter.nilambarsonu.me/api/docs/](https://spotter.nilambarsonu.me/api/docs/)
-- **Loom Video Walkthrough Script:** [docs/LOOM_SCRIPT.md](docs/LOOM_SCRIPT.md) *(Structured 8-minute presentation)*
 - **GitHub Repository:** [https://github.com/NilambarSonu/weather-truck-routing](https://github.com/NilambarSonu/weather-truck-routing)
 - **Architecture Decision Records:** [docs/adr/](docs/adr/)
 
