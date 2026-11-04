@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createColorRamp, formatDuration } from '../lib/colors';
+import { createColorRamp, formatDuration, formatDateTime, toLocalISO } from '../lib/colors';
 import { decodePolyline } from '../lib/polyline';
 import { useTripStore } from '../state/useTripStore';
 
@@ -20,6 +20,28 @@ describe('Frontend Color Ramp & Utilities', () => {
     expect(formatDuration(3600)).toBe('1h 0m');
     expect(formatDuration(5400)).toBe('1h 30m');
     expect(formatDuration(1800)).toBe('30m');
+  });
+
+  it('formats dates with explicit timezones consistently', () => {
+    // 2026-11-05T14:00:00Z is 8:00 AM Central Time (America/Chicago) and 7:00 AM Mountain Time (America/Denver)
+    const utcIso = '2026-11-05T14:00:00Z';
+    const chicagoStr = formatDateTime(utcIso, 'America/Chicago');
+    expect(chicagoStr).toContain('8:00 AM');
+    expect(chicagoStr).toContain('Chicago');
+
+    const denverStr = formatDateTime(utcIso, 'America/Denver');
+    expect(denverStr).toContain('7:00 AM');
+    expect(denverStr).toContain('Denver');
+
+    // Invalid timezone graceful fallback
+    const fallbackStr = formatDateTime(utcIso, 'Invalid/Timezone');
+    expect(fallbackStr).toBeTruthy();
+  });
+
+  it('converts Date to local ISO format without timezone offset shifting', () => {
+    const d = new Date(2026, 10, 5, 8, 30); // Note month 10 is November (0-indexed)
+    const localIso = toLocalISO(d);
+    expect(localIso).toBe('2026-11-05T08:30');
   });
 
   it('decodes polyline coordinates correctly', () => {

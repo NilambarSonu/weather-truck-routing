@@ -58,6 +58,7 @@ export const HeatmapControls: React.FC = () => {
   const t0Str = plan.request.departure_utc;
   const t0 = new Date(t0Str).getTime();
   const currentForecastTime = new Date(t0 + heatmapHour * 3600 * 1000).toISOString();
+  const originTz = plan.request.origin_tz;
 
   const layers: { id: WeatherLayerMode; label: string; icon: any }[] = [
     { id: 'overall', label: 'Overall Risk', icon: ShieldAlert },
@@ -100,8 +101,8 @@ export const HeatmapControls: React.FC = () => {
               +{heatmapHour.toFixed(1)}h
             </span>
             <span className="text-blue-200">|</span>
-            <span className="text-xs font-mono font-medium text-saas-text">
-              {formatDateTime(currentForecastTime)}
+            <span className="text-xs font-mono font-medium text-saas-text" title={`Forecast time in Origin timezone (${originTz})`}>
+              {formatDateTime(currentForecastTime, originTz)}
             </span>
           </div>
 

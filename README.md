@@ -1,6 +1,7 @@
 # Spotter Weather-Aware Truck Routing Platform
 
-[![CI Pipeline](https://github.com/spotter-assessment/weather-truck-routing/actions/workflows/ci.yml/badge.svg)](https://github.com/spotter-assessment/weather-truck-routing/actions)
+[![CI Pipeline](https://github.com/NilambarSonu/weather-truck-routing/actions/workflows/ci.yml/badge.svg)](https://github.com/NilambarSonu/weather-truck-routing/actions)
+[![Live Production](https://img.shields.io/badge/Vercel-spotter.nilambarsonu.me-000000.svg?logo=vercel&logoColor=white)](https://spotter.nilambarsonu.me)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
 [![Django 5](https://img.shields.io/badge/django-5.1-green.svg)](https://www.djangoproject.com/)
 [![React 18](https://img.shields.io/badge/react-18.3-cyan.svg)](https://react.dev/)
@@ -12,11 +13,13 @@
 
 ---
 
-## Live Product & Walkthrough Deliverables
+## Live Product & Assessment Deliverables
 
-- **Hosted Application:** [Live Deployment Ready](http://localhost:8000) (Single-service containerized deployment via Render / Docker)
-- **Loom Video Walkthrough:** [8-Minute Walkthrough Video Script](docs/LOOM_SCRIPT.md)
-- **OpenAPI 3 Specification:** `GET /api/schema/` or interactive Swagger UI at `/api/docs/`
+- **Live Production Platform:** [https://spotter.nilambarsonu.me](https://spotter.nilambarsonu.me) *(Primary Custom Domain)*
+- **Vercel Production Mirror:** [https://incomplete-six.vercel.app](https://incomplete-six.vercel.app)
+- **Interactive OpenAPI 3 / Swagger Documentation:** [https://spotter.nilambarsonu.me/api/docs/](https://spotter.nilambarsonu.me/api/docs/)
+- **Loom Video Walkthrough Script:** [docs/LOOM_SCRIPT.md](docs/LOOM_SCRIPT.md) *(Structured 8-minute presentation)*
+- **GitHub Repository:** [https://github.com/NilambarSonu/weather-truck-routing](https://github.com/NilambarSonu/weather-truck-routing)
 - **Architecture Decision Records:** [docs/adr/](docs/adr/)
 
 ---
@@ -132,7 +135,7 @@ cd backend
 5. **No Travel Hard Block:** Asserts that a route with No Travel miles is never recommended over an unblocked option.
 
 ```bash
-# Run frontend unit tests (4 tests)
+# Run frontend unit tests (6 tests)
 cd frontend
 npm test
 ```
@@ -149,12 +152,12 @@ npm test
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/spotter-assessment/weather-truck-routing.git
+git clone https://github.com/NilambarSonu/weather-truck-routing.git
 cd weather-truck-routing
 
 # 2. Setup backend virtualenv
 cd backend
-/opt/homebrew/bin/python3.12 -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
@@ -181,12 +184,12 @@ Open [http://localhost:8000](http://localhost:8000).
 
 ## 7. Keyless Demo vs Live Provider Architecture
 
-The application is engineered to be **100% functional out of the box without requiring paid or restricted API credentials**:
+The application is engineered to be **100% functional out of the box without requiring paid or restricted API credentials**, while seamlessly integrating enterprise providers in production:
 
-- **Weather:** Defaults to **Open-Meteo**, a free live API for non-commercial use with no API key required.
-- **Geocoding:** Defaults to **Photon / OpenStreetMap**, providing instant keyless place autocomplete.
-- **Routing:** Defaults to a high-fidelity synthetic corridor generator providing 3 distinct, drivable highway routes with step-level time curves between any two points in the US.
-- **Commercial API Upgrades:** Setting `TOMTOM_API_KEY` in environment variables instantly upgrades routing to TomTom's live truck engine with zero code changes.
+- **Weather:** Connected to **Open-Meteo**, providing live multi-hazard hourly forecasts across the Continental United States.
+- **Geocoding:** Powered by **Photon / OpenStreetMap**, providing instant place autocomplete without API rate limits or keys.
+- **Commercial Truck Routing:** Configured with **TomTom Truck Routing API** (`TOMTOM_API_KEY`) for true commercial truck geometries, speed curves, and bridge/weight restrictions. Active and verified on the live deployment.
+- **Keyless Demo Fallback:** If API credentials are not present in a local environment, the system automatically activates high-fidelity synthetic corridor generators with step-level time curves, ensuring zero setup friction.
 
 ---
 

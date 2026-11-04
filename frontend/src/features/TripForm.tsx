@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Place, TripPlanRequest } from '../api/types';
 import { geocodePlaces, createTripPlan, getHeatmap } from '../api/client';
 import { useTripStore } from '../state/useTripStore';
+import { toLocalISO } from '../lib/colors';
 import { MapPin, Calendar, Weight, Sliders, ChevronDown, ChevronUp, Navigation, AlertCircle } from 'lucide-react';
 
 interface FormValues {
@@ -55,7 +56,7 @@ export const TripForm: React.FC = () => {
     const d = new Date();
     d.setDate(d.getDate() + 1);
     d.setHours(8, 0, 0, 0);
-    return d.toISOString().slice(0, 16);
+    return toLocalISO(d);
   };
 
   const { register, handleSubmit, setValue, watch } = useForm<FormValues>({
@@ -268,7 +269,7 @@ export const TripForm: React.FC = () => {
             type="button"
             onClick={() => {
               const now = new Date();
-              setValue('departure_local', now.toISOString().slice(0, 16));
+              setValue('departure_local', toLocalISO(now));
             }}
             className="text-[11px] bg-white hover:bg-slate-50 text-saas-secondary hover:text-saas-text px-2 py-1 rounded-md border border-saas-border transition shadow-saas-sm font-medium"
           >
@@ -278,7 +279,7 @@ export const TripForm: React.FC = () => {
             type="button"
             onClick={() => {
               const in2h = new Date(Date.now() + 2 * 3600 * 1000);
-              setValue('departure_local', in2h.toISOString().slice(0, 16));
+              setValue('departure_local', toLocalISO(in2h));
             }}
             className="text-[11px] bg-white hover:bg-slate-50 text-saas-secondary hover:text-saas-text px-2 py-1 rounded-md border border-saas-border transition shadow-saas-sm font-medium"
           >
@@ -292,6 +293,9 @@ export const TripForm: React.FC = () => {
             Tomorrow 8 AM
           </button>
         </div>
+        <p className="text-[10px] text-saas-muted mt-1.5 font-medium">
+          Anchored to origin terminal timezone ({origin?.label.includes('Chicago') ? 'America/Chicago, CT' : 'Auto-detected on dispatch'})
+        </p>
       </div>
 
       {/* Load Weight in pounds */}

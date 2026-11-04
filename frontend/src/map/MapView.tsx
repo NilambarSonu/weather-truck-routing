@@ -241,11 +241,11 @@ export const MapView: React.FC = () => {
           </div>
           <div class="flex justify-between">
             <span class="text-saas-secondary">Truck ETA:</span>
-            <span class="font-mono text-saas-primary font-bold">${formatDateTime(cp.eta_utc)}</span>
+            <span class="font-mono text-saas-primary font-bold">${formatDateTime(cp.eta_utc, cp.tz)}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-saas-secondary">Forecast Hour:</span>
-            <span class="font-mono text-saas-secondary font-medium">${formatDateTime(cp.weather.forecast_hour_used)}</span>
+            <span class="font-mono text-saas-secondary font-medium">${formatDateTime(cp.weather.forecast_hour_used, cp.tz)}</span>
           </div>
         </div>
 

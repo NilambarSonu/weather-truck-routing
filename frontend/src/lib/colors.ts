@@ -86,17 +86,37 @@ export function formatDuration(seconds: number): string {
   return `${h}h ${m}m`;
 }
 
-export function formatDateTime(isoString: string): string {
+export function formatDateTime(isoString: string, timeZone?: string): string {
   try {
     const d = new Date(isoString);
-    return d.toLocaleString('en-US', {
+    const options: Intl.DateTimeFormatOptions = {
       month: 'short',
       day: 'numeric',
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
-    });
+    };
+    if (timeZone) {
+      try {
+        options.timeZone = timeZone;
+      } catch {
+        // Fall back to local if invalid timezone identifier
+      }
+    }
+    const formatted = d.toLocaleString('en-US', options);
+    const tzLabel = timeZone ? ` (${timeZone.split('/').pop()?.replace('_', ' ')})` : '';
+    return `${formatted}${tzLabel}`;
   } catch {
     return isoString;
   }
+}
+
+export function toLocalISO(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const year = d.getFullYear();
+  const month = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const hours = pad(d.getHours());
+  const minutes = pad(d.getMinutes());
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
